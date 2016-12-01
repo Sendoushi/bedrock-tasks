@@ -1,0 +1,57 @@
+{
+  "name": "bedrock-tasks",
+  "version": "0.0.1",
+  "description": "Tasks to use on frontend",
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:sendoushi/bedrock-tasks.git"
+  },
+  "bin": {
+    "bedrock-tasks": "./src/runner/bedrock.js",
+    "gulp": "./src/runner/gulpfile.js",
+    "grunt": "./src/runner/gruntfile.js"
+  },
+  "main": "./src/index.js",
+  "engines": {
+    "node": ">=5"
+  },
+  "scripts": {
+    "test": "npm run eslint-test",
+    "eslint": "$(npm bin)/eslint",
+    "eslint-test": "npm run eslint -- ./tasks/**/*.js"
+  },
+  "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "eslint": "^2.0.0",
+    "eslint-config-defaults": "^9.0.0",
+    "eslint-plugin-react": "^6.2.0"
+  },
+  "dependencies": {
+    "autoprefixer": "^6.5.1",
+    "bedrock-utils": "git://github.com/Sendoushi/bedrock-utils.git#0.1.1",
+    "deepmerge": "^1.2.0",
+    "del": "^2.2.2",
+    "dot": "^1.0.3",
+    "escape-html": "^1.0.3",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-imagemin": "^3.1.0",
+    "gulp-less": "^3.1.0",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-svg-sprites": "^4.0.2",
+    "gulp-webpack": "^1.5.0",
+    "gulp.spritesmith": "^6.2.1",
+    "joi": "^9.2.0",
+    "js-beautify": "^1.6.4",
+    "js-string-escape": "^1.0.1",
+    "merge-stream": "^1.0.0",
+    "mkdirp": "^0.5.1",
+    "node-sass": "^3.10.1",
+    "postcss": "^5.2.5",
+    "through2": "^2.0.1",
+    "vinyl-buffer": "^1.0.0",
+    "webpack": "^1.13.2",
+    "yargs": "^6.3.0"
+  }
+}
