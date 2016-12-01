@@ -40,8 +40,7 @@
                         "name": "provide",
                         "args": [{
                             "$": "jquery",
-                            "jQuery": "jquery",
-                            "Promise": "imports?this=>global!exports?global.Promise!es6-promise"
+                            "jQuery": "jquery"
                         }]
                     }]
                 },

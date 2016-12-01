@@ -21,8 +21,7 @@
                     "name": "provide",
                     "args": [{
                         "$": "jquery",
-                        "jQuery": "jquery",
-                        "Promise": "imports?this=>global!exports?global.Promise!es6-promise"
+                        "jQuery": "jquery"
                     }]
                 }]
             }
@@ -46,18 +45,7 @@
                     "name": "provide",
                     "args": [{
                         "$": "jquery",
-                        "jQuery": "jquery",
-                        "Promise": "imports?this=>global!exports?global.Promise!es6-promise"
-                    }]
-                }, {
-                    "name": "webpack-closure-compiler",
-                    "args": [{
-                        "compiler": {
-                            "language_in": "ECMASCRIPT5",
-                            "language_out": "ECMASCRIPT5",
-                            "compilation_level": "ADVANCED"
-                        },
-                        "concurrency": 3
+                        "jQuery": "jquery"
                     }]
                 }, {
                     "name": "uglify",

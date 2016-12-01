@@ -286,6 +286,7 @@ function rawBuild(task, cb) {
 
     // Set entry
     options.entry = task.src;
+    options.output = options.output || {};
     options.output.path = path.dirname(task.dest);
     options.output.filename = path.basename(task.dest);
 

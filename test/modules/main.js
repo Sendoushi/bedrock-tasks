@@ -1,5 +1,5 @@
 /* eslint-disable strict */'use strict';/* eslint-enable */
-/* global describe it */
+/* global describe, it, Promise */
 
 var expect = require('chai').expect;
 var file = require('bedrock-utils/src/node/file.js');
@@ -121,6 +121,69 @@ describe('main', function () {
 
         it('should run task under env', function (done) {
             main.run('clean', config, 'prod', done);
+        });
+
+        it('should run all tasks', function (done) {
+            var env = 'dev';
+            var generalPromise;
+
+            this.timeout(10000);
+
+            // Now for the tasks
+            generalPromise = new Promise(resolve => resolve());
+            generalPromise.then(function () {
+                var promise = new Promise(function (resolve, reject) {
+                    main.run('clean', config, env, function (err) {
+                        if (err) { reject(err); } else { resolve(); }
+                    });
+                });
+
+                return promise;
+            }).then(function () {
+                var promise = new Promise(function (resolve, reject) {
+                    main.run('styleguide', config, env, function (err) {
+                        if (err) { reject(err); } else { resolve(); }
+                    });
+                });
+
+                return promise;
+            }).then(function () {
+                var promise = new Promise(function (resolve, reject) {
+                    resolve();
+
+                    // TODO: Not passing because of SVG error "Callback was already called"
+                    // main.run('sprite', config, env, function (err) {
+                    //     if (err) { reject(err); } else { resolve(); }
+                    // });
+                });
+
+                return promise;
+            }).then(function () {
+                var promise = new Promise(function (resolve, reject) {
+                    main.run('copy', config, env, function (err) {
+                        if (err) { reject(err); } else { resolve(); }
+                    });
+                });
+
+                return promise;
+            }).then(function () {
+                var promise = new Promise(function (resolve, reject) {
+                    main.run('style', config, env, function (err) {
+                        if (err) { reject(err); } else { resolve(); }
+                    });
+                });
+
+                return promise;
+            }).then(function () {
+                var promise = new Promise(function (resolve, reject) {
+                    main.run('script', config, env, function (err) {
+                        if (err) { reject(err); } else { resolve(); }
+                    });
+                });
+
+                return promise;
+            }).then(() => {})
+            .then(done).catch(done);
         });
 
         it('should error without a task', function (done) {

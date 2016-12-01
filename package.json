@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^6.1.2",
+    "bedrock-components": "git://github.com/Sendoushi/bedrock-components.git#0.0.1",
     "chai": "^3.5.0",
     "eslint": "^2.0.0",
     "eslint-config-defaults": "^9.0.0",

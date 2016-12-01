@@ -8,7 +8,7 @@ var gulpSvgSprite = require('gulp-svg-sprites');
 var imagemin = require('gulp-imagemin');
 var merge = require('merge-stream');
 var buffer = require('vinyl-buffer');
-var bedrockUtils = require('bedrock-utils');
+var utilsPath = require('bedrock-utils/src/node/path.js');
 
 var OPTIONS_STRUCT = Joi.object().keys({
     style: Joi.string(),
@@ -57,7 +57,7 @@ function gulpBuild(task, cb) {
         gulpTask = gulpTask.pipe(gulpSpritesmith({
             imgName: path.basename(dest),
             cssName: path.basename(task.options.style),
-            cssTemplate: bedrockUtils.path.getPwd(task.options.styleTemplate) || path.resolve(SPRITE_TEMPLATE),
+            cssTemplate: utilsPath.getPwd(task.options.styleTemplate) || path.resolve(SPRITE_TEMPLATE),
             padding: 1
         }));
 
@@ -75,7 +75,10 @@ function gulpBuild(task, cb) {
         // Return a merged stream to handle both `end` events
         return merge(imgStream, cssStream)
         .on('end', function () { cb(); });
-    } else if (isSvg) {
+    }
+
+    if (isSvg) {
+        task.options = task.options || {};
         options = {
             mode: task.options.mode,
             selector: task.options.selector,
@@ -96,11 +99,11 @@ function gulpBuild(task, cb) {
             options.baseSize = task.options.baseSize;
         }
         if (task.options.transformData) {
-            /* eslint-disable no-new-func */
             options.transformData = function (data, config) {
+                /* eslint-disable no-new-func */
                 return Function(task.options.transformData)(data, config);
+                /* eslint-enable no-new-func */
             };
-            /* eslint-enable no-new-func */
         }
 
         gulpTask = gulpTask.pipe(gulpSvgSprite(options));

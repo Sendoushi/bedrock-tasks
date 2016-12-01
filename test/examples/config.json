@@ -16,14 +16,21 @@
         "env": "*",
         "data": [{
             "src": "./test/examples/sprite/img/**/*.png",
-            "dest": "./test/build/img",
+            "dest": "./test/build/sprite/img",
             "options": {
                 "style": "./test/build/img_sprite.scss",
-                "styleTemplate": "./tasks/modules/_assets/sprite_template.css.handlebars"
+                "styleTemplate": "./src/modules/_assets/sprite_template.css.handlebars"
             }
         }, {
             "src": "./test/examples/sprite/svg/**/*.svg",
-            "dest": "./test/build/svg"
+            "dest": "./test/build/sprite/svg",
+            "options": {
+                "preview": false,
+                "mode": "defs",
+                "selector": "%f",
+                "svgId": "%f",
+                "transformData": "var data = arguments[0]; var i; for (i = 0; i < data.svg.length; i += 1) { data.svg[i].width = null; data.svg[i].height = null; data.svg[i].data = data.svg[i].data.replace(/<svg(.*)viewBox=/g, '<svg viewBox='); } return data;"
+            }
         }]
     }, {
         "type": "styleguide",
@@ -64,8 +71,7 @@
                         "name": "provide",
                         "args": [{
                             "$": "jquery",
-                            "jQuery": "jquery",
-                            "Promise": "imports?this=>global!exports?global.Promise!es6-promise"
+                            "jQuery": "jquery"
                         }]
                     }]
                 },
@@ -115,8 +121,7 @@
                     "name": "provide",
                     "args": [{
                         "$": "jquery",
-                        "jQuery": "jquery",
-                        "Promise": "imports?this=>global!exports?global.Promise!es6-promise"
+                        "jQuery": "jquery"
                     }]
                 }]
             }
@@ -140,18 +145,7 @@
                     "name": "provide",
                     "args": [{
                         "$": "jquery",
-                        "jQuery": "jquery",
-                        "Promise": "imports?this=>global!exports?global.Promise!es6-promise"
-                    }]
-                }, {
-                    "name": "webpack-closure-compiler",
-                    "args": [{
-                        "compiler": {
-                            "language_in": "ECMASCRIPT5",
-                            "language_out": "ECMASCRIPT5",
-                            "compilation_level": "ADVANCED"
-                        },
-                        "concurrency": 3
+                        "jQuery": "jquery"
                     }]
                 }, {
                     "name": "uglify",

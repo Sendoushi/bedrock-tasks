@@ -5,14 +5,14 @@
         "type": "sprite",
         "env": "*",
         "data": [{
-            "src": "./test/sprite/img/**/*.png",
+            "src": "./test/examples/sprite/img/**/*.png",
             "dest": "./test/build/sprite/img",
             "options": {
                 "style": "./test/build/img_sprite.scss",
-                "styleTemplate": "./tasks/modules/_assets/sprite_template.css.handlebars"
+                "styleTemplate": "./src/modules/_assets/sprite_template.css.handlebars"
             }
         }, {
-            "src": "./test/sprite/svg/**/*.svg",
+            "src": "./test/examples/sprite/svg/**/*.svg",
             "dest": "./test/build/sprite/svg",
             "options": {
                 "preview": false,
