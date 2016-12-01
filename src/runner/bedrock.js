@@ -2,9 +2,10 @@
 
 /* eslint-disable strict */'use strict';/* eslint-enable strict */
 
-var fs = require('fs');
 var argv = require('yargs').argv;
 var logger = require('bedrock-utils/src/logger.js');
+var file = require('bedrock-utils/src/node/file.js');
+var utilsPath = require('bedrock-utils/src/node/path.js');
 var suite = require('../index.js');
 var env = argv.env;
 var config;
@@ -29,9 +30,8 @@ function cb(task, err) {
 //-------------------------------------
 // Runtime
 
-config = suite.getPath(argv.config);
-config = require.resolve(config);
-config = fs.readFileSync(config, 'utf8');
+config = utilsPath.getPwd(argv.config);
+config = file.readFile(config);
 config = suite.init(JSON.parse(config));
 
 // Now for the tasks

@@ -3,9 +3,9 @@
 //-------------------------------------
 // Vars / Imports
 
-var path = require('path');
 var Joi = require('joi');
-var logger = require('./utils/logger.js');
+var logger = require('bedrock-utils/src/logger.js');
+var utilsPath = require('bedrock-utils/src/node/path.js');
 
 // Import modules
 var modules = {
@@ -36,39 +36,6 @@ var STRUCT = Joi.object().keys({
 
 //-------------------------------------
 // Functions
-
-/**
- * Check if url is valid
- *
- * @param {string} url
- * @returns
- */
-function checkUrl(url) {
-    var pattern = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
-
-    return pattern.test(url);
-}
-
-/**
- * Gets path
- * @param  {string} src
- * @return {string}
- */
-function getPath(src) {
-    var newSrc = src;
-
-    if (src && typeof src === 'string') {
-        if (checkUrl(src)) {
-            return src;
-        }
-
-        newSrc = (src[0] !== '/') ? path.join(process.env.PWD, src) : src;
-    } else if (src && typeof src === 'object' && src.hasOwnProperty('length')) {
-        newSrc = src.map(function (val) { return getPath(val); });
-    }
-
-    return newSrc;
-}
 
 /**
  * Verify if config is right
@@ -118,10 +85,14 @@ function verify(config) {
  * @return {array}
  */
 function getTasks(config, type, env) {
-    var tTasks = config.tasks;
+    var tTasks = config.tasks || [];
     var internTasks = [];
     var c;
     var i;
+
+    if (!type || !tasks[type]) {
+        throw new Error('Set a valid type');
+    }
 
     // Lets filter!
     tTasks = tTasks.filter(function (task) {
@@ -138,8 +109,8 @@ function getTasks(config, type, env) {
         for (c = 0; c < tTasks[i].length; c += 1) {
             tTasks[i][c].projectId = config.projectId;
             tTasks[i][c].projectName = config.projectName;
-            tTasks[i][c].src = getPath(tTasks[i][c].src);
-            tTasks[i][c].dest = getPath(tTasks[i][c].dest);
+            tTasks[i][c].src = utilsPath.getPwd(tTasks[i][c].src);
+            tTasks[i][c].dest = utilsPath.getPwd(tTasks[i][c].dest);
 
             internTasks.push(tTasks[i][c]);
         }
@@ -152,19 +123,44 @@ function getTasks(config, type, env) {
  * Set tasks
  * @param {function} fn
  * @param {array} tasks
- * @param {Function} cb
+ * @param {function} cb
  */
 function setTasks(fn, tTasks, cb) {
     var cbs = [];
+    var hasErrored = false;
+
+    if (!fn) {
+        throw new Error('A function is required');
+    }
+
+    tTasks = tTasks || [];
 
     // Maybe there isn't anything
     cbs.length === tTasks.length && cb();
 
     // Lets go per task
     tTasks.forEach(function (task) {
-        fn(task, function () {
+        if (hasErrored) {
+            return;
+        }
+
+        fn(task, function (err) {
+            if (hasErrored) {
+                return;
+            }
+
+            if (err) {
+                hasErrored = true;
+
+                if (cb) {
+                    cb(err);
+                } else {
+                    throw err;
+                }
+            }
+
             cbs.push(1);
-            cbs.length === tTasks.length && cb();
+            cb && cbs.length === tTasks.length && cb();
         });
     });
 }
@@ -177,10 +173,30 @@ function setTasks(fn, tTasks, cb) {
  * @param {function} cb
  */
 function run(task, config, env, cb) {
+    var tTasks;
+
+    if (typeof env === 'function') {
+        cb = env;
+        env = null;
+    }
+
+    if (!task || !tasks[task] || !tasks[task].fn) {
+        return cb(new Error('Task is required'));
+    }
+
+    if (!config) {
+        return cb(new Error('Config is required'));
+    }
+
     try {
-        setTasks(tasks[task].fn, getTasks(config, task, env), cb);
+        tTasks = getTasks(config, task, env);
+        setTasks(tasks[task].fn, tTasks, cb);
     } catch (err) {
-        cb(err);
+        if (cb) {
+            cb(err);
+        } else {
+            throw err;
+        }
     }
 }
 
@@ -188,14 +204,22 @@ function run(task, config, env, cb) {
  * Initialize
  *
  * @param {object} config
+ * @param {boolean} dontLog
  * @returns {object}
  */
-function init(config) {
+function init(config, dontLog) {
+    var msg;
+
     config = verify(config);
 
     // Verify config
     if (config.error) {
-        logger.err('Validation', 'Error happened in: ' + config.error.type);
+        msg = 'Error happened in: ' + config.error.type;
+        if (config.error.ValidationError) {
+            msg += ' ' + config.error.ValidationError;
+        }
+
+        !dontLog && logger.err('Validation', 'Error happened in: ' + msg);
         throw new Error(config.error.msg);
     } else {
         config = config.value;
@@ -211,6 +235,5 @@ module.exports = {
     init: init,
     run: run,
     setTasks: setTasks,
-    getTasks: getTasks,
-    getPath: getPath
+    getTasks: getTasks
 };

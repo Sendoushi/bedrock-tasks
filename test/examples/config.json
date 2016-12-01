@@ -9,7 +9,7 @@
         "type": "copy",
         "env": "*",
         "data": [
-            { "src": "./test/examples/copy/**/*.php", "dest": "./test/build" }
+            { "src": "./test/examples/clean_copy/**/*.php", "dest": "./test/build" }
         ]
     }, {
         "type": "sprite",
