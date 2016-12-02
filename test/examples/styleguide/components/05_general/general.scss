@@ -1,4 +1,5 @@
-@import '../../../../../node_modules/bedrock-components/src/_assets/css/general.scss';
+@import '../../../../../node_modules/bedrock-components/src/_assets/base/elements.scss';
+@import '../../../../../node_modules/bedrock-components/src/_assets/layout/breakpoints.scss';
 
 @include wrapper();
 

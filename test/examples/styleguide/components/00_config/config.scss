@@ -1,4 +1,6 @@
-@import '../../../../../node_modules/bedrock-components/src/_assets/css/normalize.scss';
-@import '../../../../../node_modules/bedrock-components/src/_assets/css/breakpoints.scss';
+@import '../../../../../node_modules/bedrock-components/src/_assets/base/settings.scss';
+@import '../../../../../node_modules/bedrock-components/src/_assets/layout/normalize.scss';
+@import '../../../../../node_modules/bedrock-components/src/_assets/layout/breakpoints.scss';
+
 @import '../02_colors/colors.scss';
 @import './sizes.scss';
