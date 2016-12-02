@@ -17,7 +17,7 @@ config = JSON.parse(file.readFile(config));
 describe('module:sprite', function () {
     // build
     describe('build', function () {
-        it('should compile', function (done) {
+        it.skip('should compile', function (done) {
             var env = 'dev';
             var generalPromise;
 
@@ -30,9 +30,9 @@ describe('module:sprite', function () {
                     resolve();
 
                     // TODO: Not passing because of SVG error "Callback was already called"
-                    // main.run('sprite', config, env, function (err) {
-                    //     if (err) { reject(err); } else { resolve(); }
-                    // });
+                    main.run('sprite', config, env, function (err) {
+                        if (err) { reject(err); } else { resolve(); }
+                    });
                 });
 
                 return promise;
