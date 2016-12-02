@@ -2,6 +2,8 @@
 
 Tasks to use on the frontend.
 
+[![Build Status](https://travis-ci.org/Sendoushi/bedrock-tasks.svg?branch=master)](https://travis-ci.org/Sendoushi/bedrock-tasks)
+
 ## Installation
 You need to have [node](http://nodejs.org) so you can have the package dependency management and use the tasks:
 - Install [node](http://nodejs.org)
