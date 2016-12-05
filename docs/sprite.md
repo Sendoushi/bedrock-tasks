@@ -9,6 +9,7 @@ Module to spritesheet files.<br>
     "data": [{
         "src": "<task_src_glob>.png",
         "dest": "<task_dest>",
+        "ignore": "<task_src_glob>",
         "options": {
             "style": "<path_for_built_style>",
             "styleTemplate": "<path_for_style_handlebars_template>"
@@ -16,6 +17,7 @@ Module to spritesheet files.<br>
     }, {
         "src": "<task_src_glob>.svg",
         "dest": "<task_dest>",
+        "ignore": "<task_src_glob>",
         "options": {
             "style": "<path_for_built_style>",
             "preview": "<false||true>",
@@ -28,6 +30,8 @@ Module to spritesheet files.<br>
     }]
 }
 ```
+
+`src` and `ignore` can be an array.
 
 ### Examples
 Go under the [../test/examples/sprite](test/examples/sprite) folder and check the `*.json`.

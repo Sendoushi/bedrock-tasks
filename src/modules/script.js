@@ -112,9 +112,15 @@ var OPTIONS_STRUCT = Joi.object().keys({
 });
 
 var STRUCT = Joi.object().keys({
-    src: Joi.string().required(),
+    src: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).required(),
     dest: Joi.string().required(),
-    // ignore: Joi.string().default('').allow(''),
+    // ignore: Joi.alternatives().try(
+    //     Joi.array(Joi.string()),
+    //     Joi.string()
+    // ).default([]),
     // order: Joi.number().default(0),
     options: OPTIONS_STRUCT
 });

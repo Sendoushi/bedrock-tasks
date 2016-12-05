@@ -5,9 +5,15 @@ var Joi = require('joi');
 var del = require('del');
 
 var STRUCT = Joi.object().keys({
-    src: Joi.string().required(),
-    dest: Joi.string()
-    // ignore: Joi.string().default('').allow(''),
+    src: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).required(),
+    dest: Joi.string(),
+    ignore: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).default([])
     // order: Joi.number().default(0),
 });
 
@@ -20,7 +26,7 @@ var STRUCT = Joi.object().keys({
  * @param  {Function} cb
  */
 function clean(task, cb) {
-    var srcs = !!task ? [task.src] : [];
+    var srcs = !!task ? task.src : [];
 
     if (!srcs.length) {
         return cb();

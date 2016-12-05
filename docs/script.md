@@ -120,6 +120,8 @@ Follow the types used in the below configuration, otherwise you will break the c
 }
 ```
 
+`src` can be an array.
+
 ### Examples
 Go under the [test/examples/script](test/examples/script), [test/examples/script/es6](test/examples/script/es6), [test/examples/script/flow](test/examples/script/flow) or [test/examples/script/typescript](test/examples/script/typescript) folders and check the `*.json`.
 

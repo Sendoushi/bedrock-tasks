@@ -10,6 +10,7 @@ var autoprefixer = require('autoprefixer');
 var gulpAutoprefixer = require('gulp-autoprefixer');
 var sourcemaps = require('gulp-sourcemaps');
 var Joi = require('joi');
+var type = require('bedrock-utils/src/type.js');
 
 var OPTIONS_STRUCT = Joi.object().keys({
     minify: Joi.boolean().default(true),
@@ -24,9 +25,15 @@ var OPTIONS_STRUCT = Joi.object().keys({
 });
 
 var STRUCT = Joi.object().keys({
-    src: Joi.string().required(),
+    src: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).required(),
     dest: Joi.string().required(),
-    // ignore: Joi.string().default('').allow(''),
+    // ignore: Joi.alternatives().try(
+    //     Joi.array(Joi.string()),
+    //     Joi.string()
+    // ).default([]),
     // order: Joi.number().default(0),
     options: OPTIONS_STRUCT
 });
@@ -35,14 +42,66 @@ var STRUCT = Joi.object().keys({
 // Functions
 
 /**
+ * Is less
+ *
+ * @param {array} srcs
+ * @returns boolean
+ */
+function isLess(srcs) {
+    var src;
+    var i;
+
+    for (i = 0; i < srcs.length; i += 1) {
+        src = srcs[i];
+
+        if (src[0] === '!') {
+            continue;
+        }
+
+        if (src.replace('.less', '') !== src) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Is sass
+ *
+ * @param {array} srcs
+ * @returns boolean
+ */
+function isSass(srcs) {
+    var src;
+    var i;
+
+    for (i = 0; i < srcs.length; i += 1) {
+        src = srcs[i];
+
+        if (src[0] === '!') {
+            continue;
+        }
+
+        if (src.replace('.scss', '') !== src || src.replace('.sass', '') !== src) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Raw build
  * @param  {object} task
  * @param  {function} cb
  * @return {string}
  */
 function rawBuild(task, cb) {
+    // Index is setting up an array but we can only support one for now
+    var src = !type.isArray(task.src) ? task.src : task.src[0];
     var css = sass.renderSync({
-        file: task.src,
+        file: src,
         outputStyle: task.options.minify ? 'compressed' : 'expanded',
         sourceMap: task.options.sourceMap,
         sourceMapEmbed: task.options.sourceMap,
@@ -68,13 +127,14 @@ function rawBuild(task, cb) {
  * @param  {function} cb
  */
 function gulpBuild(task, cb) {
-    var gulpTask = gulp.src(task.src);
-    var isSass = task.src.replace('.scss', '') !== task.src || task.src.replace('.sass', '') !== task.src;
-    var isLess = task.src.replace('.less', '') !== task.src;
+    var src = type.isArray(task.src) ? task.src : [task.src];
+    var gulpTask = gulp.src(src);
+    var isItSass = isSass(src);
+    var isItLess = isLess(src);
 
-    if (isSass) {
+    if (isItSass) {
         gulpTask = gulpTask.pipe(gulpSass().on('error', gulpSass.logError));
-    } else if (isLess) {
+    } else if (isItLess) {
         // Nothing to do here...
     } else {
         return;
@@ -85,11 +145,11 @@ function gulpBuild(task, cb) {
         gulpTask = gulpTask.pipe(sourcemaps.init());
     }
 
-    if (isSass) {
+    if (isItSass) {
         gulpTask = gulpTask.pipe(gulpSass({
             outputStyle: task.options.minify ? 'compressed' : 'expanded'
         }).on('error', gulpSass.logError));
-    } else if (isLess) {
+    } else if (isItLess) {
         gulpTask = gulpTask.pipe(gulpLess());
     }
 

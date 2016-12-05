@@ -10,6 +10,7 @@ var beautify = require('js-beautify');
 var merge = require('deepmerge');
 var escape = require('escape-html');
 var jsStringEscape = require('js-string-escape');
+var type = require('bedrock-utils/src/type.js');
 var scriptModule = require('./script.js');
 var styleModule = require('./style.js');
 
@@ -23,9 +24,15 @@ var OPTIONS_STRUCT = Joi.object().keys({
 });
 
 var STRUCT = Joi.object().keys({
-    src: Joi.string().required(),
+    src: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).required(),
     dest: Joi.string(),
-    // ignore: Joi.string().default('').allow(''),
+    // ignore: Joi.alternatives().try(
+    //     Joi.array(Joi.string()),
+    //     Joi.string()
+    // ).default([]),
     // order: Joi.number().default(0),
     options: OPTIONS_STRUCT.required()
 });
@@ -212,7 +219,9 @@ function buildComponents(comps, layouts) {
  * @return {object}
  */
 function getComponents(task) {
-    var pathSrc = path.join(task.src, 'components');
+    // Index is setting up an array but we can only support one for now
+    var taskSrc = !type.isArray(task.src) ? task.src : task.src[0];
+    var pathSrc = path.join(taskSrc, 'components');
     var components = [];
 
     // Lets require and template each in config now
@@ -245,7 +254,9 @@ function getComponents(task) {
  * @return {object}
  */
 function getLayouts(task) {
-    var pathSrc = path.join(task.src, 'layouts');
+    // Index is setting up an array but we can only support one for now
+    var taskSrc = !type.isArray(task.src) ? task.src : task.src[0];
+    var pathSrc = path.join(taskSrc, 'layouts');
     var keys = Object.keys(task.options.layouts);
     var layouts = {};
     var src;

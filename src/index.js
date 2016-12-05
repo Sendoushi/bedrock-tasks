@@ -3,6 +3,7 @@
 var Joi = require('joi');
 var logger = require('bedrock-utils/src/logger.js');
 var utilsPath = require('bedrock-utils/src/node/path.js');
+var type = require('bedrock-utils/src/type.js');
 
 var modules = {
     file: require('./modules/file.js'),
@@ -80,19 +81,21 @@ function verify(config) {
  * @param  {string} env
  * @return {array}
  */
-function getTasks(config, type, env) {
+function getTasks(config, tType, env) {
     var tTasks = config.tasks || [];
     var internTasks = [];
+    var ignore;
+    var src;
     var c;
     var i;
 
-    if (!type || !tasks[type]) {
+    if (!tType || !tasks[tType]) {
         throw new Error('Set a valid type');
     }
 
     // Lets filter!
     tTasks = tTasks.filter(function (task) {
-        var isType = task.type === type;
+        var isType = task.type === tType;
         var isEnv = task.env === '*' || env === task.env;
 
         return isType && isEnv;
@@ -105,8 +108,15 @@ function getTasks(config, type, env) {
         for (c = 0; c < tTasks[i].length; c += 1) {
             tTasks[i][c].projectId = config.projectId;
             tTasks[i][c].projectName = config.projectName;
-            tTasks[i][c].src = utilsPath.getPwd(tTasks[i][c].src);
             tTasks[i][c].dest = utilsPath.getPwd(tTasks[i][c].dest);
+
+            // Take care of source and ignore
+            src = utilsPath.getPwd(tTasks[i][c].src);
+            src = !type.isArray(src) ? [src] : src;
+            ignore = tTasks[i][c].ignore || [];
+            ignore = !type.isArray(ignore) ? [ignore] : ignore;
+            ignore = utilsPath.getPwd(ignore).map(val => '!' + val);
+            tTasks[i][c].src = src.concat(ignore);
 
             internTasks.push(tTasks[i][c]);
         }

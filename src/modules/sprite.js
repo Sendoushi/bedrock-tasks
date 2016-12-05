@@ -9,6 +9,7 @@ var imagemin = require('gulp-imagemin');
 var merge = require('merge-stream');
 var buffer = require('vinyl-buffer');
 var utilsPath = require('bedrock-utils/src/node/path.js');
+var type = require('bedrock-utils/src/type.js');
 
 var OPTIONS_STRUCT = Joi.object().keys({
     style: Joi.string(),
@@ -27,17 +28,73 @@ var OPTIONS_STRUCT = Joi.object().keys({
 });
 
 var STRUCT = Joi.object().keys({
-    src: Joi.string().required(),
+    src: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).required(),
     dest: Joi.string().required(),
-    // ignore: Joi.string().default('').allow(''),
+    ignore: Joi.alternatives().try(
+        Joi.array(Joi.string()),
+        Joi.string()
+    ).default([]),
     // order: Joi.number().default(0),
     options: OPTIONS_STRUCT
 });
 
-var SPRITE_TEMPLATE = './_assets/sprite_template.css.handlebars';
+var SPRITE_TEMPLATE = path.resolve(path.join(__dirname, '_assets/sprite_template.css.handlebars'));
 
 //-------------------------------------
 // Functions
+
+/**
+ * Is svg
+ *
+ * @param {array} srcs
+ * @returns boolean
+ */
+function isSvg(srcs) {
+    var src;
+    var i;
+
+    for (i = 0; i < srcs.length; i += 1) {
+        src = srcs[i];
+
+        if (src[0] === '!') {
+            continue;
+        }
+
+        if (src.replace('.svg', '') !== src) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Is image
+ *
+ * @param {array} srcs
+ * @returns boolean
+ */
+function isImage(srcs) {
+    var src;
+    var i;
+
+    for (i = 0; i < srcs.length; i += 1) {
+        src = srcs[i];
+
+        if (src[0] === '!') {
+            continue;
+        }
+
+        if (src.replace('.png', '') !== src || src.replace('.jpg', '') !== src) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 /**
  * Initialize tasks
@@ -45,20 +102,21 @@ var SPRITE_TEMPLATE = './_assets/sprite_template.css.handlebars';
  * @param  {function} cb
  */
 function gulpBuild(task, cb) {
-    var gulpTask = gulp.src(task.src);
-    var isSvg = task.src.replace('.svg', '') !== task.src;
-    var isImage = task.src.replace('.png', '') !== task.src || task.src.replace('.jpg', '') !== task.src;
+    var src = type.isArray(task.src) ? task.src : [task.src];
+    var gulpTask = gulp.src(src);
+    var svg = isSvg(src);
+    var image = isImage(src);
+    var cssName = task.options.style ? path.basename(task.options.style) : 'sprite';
+    var cssTemplate = task.options.styleTemplate && utilsPath.getPwd(task.options.styleTemplate) || SPRITE_TEMPLATE;
     var dest = task.dest;
+    var baseName = path.basename(dest);
     var imgStream;
     var cssStream;
     var options;
 
-    if (isImage) {
+    if (image) {
         gulpTask = gulpTask.pipe(gulpSpritesmith({
-            imgName: path.basename(dest),
-            cssName: path.basename(task.options.style),
-            cssTemplate: utilsPath.getPwd(task.options.styleTemplate) || path.resolve(SPRITE_TEMPLATE),
-            padding: 1
+            imgName: path.basename(dest), cssName: cssName, cssTemplate: cssTemplate, padding: 1
         }));
 
         // Lets take care of image
@@ -69,15 +127,13 @@ function gulpBuild(task, cb) {
         .pipe(gulp.dest(path.dirname(dest)));
 
         // Lets take care of css
-        cssStream = gulpTask.css
-        .pipe(gulp.dest(path.dirname(task.options.style)));
+        cssStream = gulpTask.css.pipe(gulp.dest(cssName));
 
         // Return a merged stream to handle both `end` events
-        return merge(imgStream, cssStream)
-        .on('end', function () { cb(); });
+        return merge(imgStream, cssStream).on('end', function () { cb(); });
     }
 
-    if (isSvg) {
+    if (svg) {
         task.options = task.options || {};
         options = {
             mode: task.options.mode,
@@ -89,6 +145,7 @@ function gulpBuild(task, cb) {
                 symbols: 'symbols.svg'
             }
         };
+
         if (task.options.preview === false) {
             options.preview = false;
         }
@@ -98,6 +155,7 @@ function gulpBuild(task, cb) {
         if (task.options.baseSize) {
             options.baseSize = task.options.baseSize;
         }
+
         if (task.options.transformData) {
             options.transformData = function (data, config) {
                 /* eslint-disable no-new-func */
@@ -108,12 +166,11 @@ function gulpBuild(task, cb) {
 
         gulpTask = gulpTask.pipe(gulpSvgSprite(options));
 
-        if (path.basename(dest) === 'svg') {
+        if (baseName.replace('svg', '') !== baseName) {
             dest = path.dirname(dest);
         }
 
-        return gulpTask.pipe(gulp.dest(dest))
-        .on('end', function () { cb(); });
+        return gulpTask.pipe(gulp.dest(dest)).on('end', function () { cb(); });
     }
 }
 
