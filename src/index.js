@@ -1,13 +1,9 @@
 /* eslint-disable strict */'use strict';/* eslint-enable strict */
 
-//-------------------------------------
-// Vars / Imports
-
 var Joi = require('joi');
 var logger = require('bedrock-utils/src/logger.js');
 var utilsPath = require('bedrock-utils/src/node/path.js');
 
-// Import modules
 var modules = {
     file: require('./modules/file.js'),
     script: require('./modules/script.js'),

@@ -8,8 +8,8 @@
   },
   "bin": {
     "bedrock-tasks": "./src/runner/bedrock.js",
-    "gulp": "./src/runner/gulpfile.js",
-    "grunt": "./src/runner/gruntfile.js"
+    "bedrock-tasks-gulp": "./src/runner/gulpfile.js",
+    "bedrock-tasks-grunt": "./src/runner/gruntfile.js"
   },
   "main": "./src/index.js",
   "engines": {
@@ -58,6 +58,7 @@
     "through2": "^2.0.1",
     "vinyl-buffer": "^1.0.0",
     "webpack": "^1.13.2",
+    "webpack-bundle-analyzer": "^2.1.1",
     "yargs": "^6.3.0"
   }
 }

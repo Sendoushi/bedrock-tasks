@@ -49,11 +49,11 @@ suite.run('script', config, env, cb);
 #### Gulp Usage
 
 ```
-node <gulp_path> --gulpfile=<bedrock_utils_gulpfile> <task> --env=<task_env> --config=<config_src>
+node <gulp_path> --gulpfile=<bedrock_tasks_gulpfile> <task> --env=<task_env> --config=<config_src>
 ```
 
 - `<gulp_path>`: Pass the path to `gulp`. From example `node_modules/.bin/gulp`. You could simply use `gulp` instead if you have it globally.
-- `<bedrock_utils_gulpfile>`: Set the path for the `bedrock-tasks` gulpfile. It should be under `node_modules/bedrock-tasks/runner/gulpfile.js`. It is required.
+- `<bedrock_tasks_gulpfile>`: Set the path for the `bedrock-tasks` gulpfile. It should be under `node_modules/bedrock-tasks/runner/gulpfile.js`. It is required.
 - `<task_env>`: Environment in which the task should run. It is optional.
 
 ##### Example

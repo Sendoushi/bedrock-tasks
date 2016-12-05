@@ -1,6 +1,4 @@
-/* eslint-disable strict */
-'use strict';
-/* eslint-enable strict */
+/* eslint-disable strict */'use strict';/* eslint-enable strict */
 
 //-------------------------------------
 // Vars / Imports
