@@ -4,9 +4,10 @@
 // Vars / Imports
 
 var suite = require('../index.js');
-var fs = require('fs');
 var argv = require('yargs').argv;
 var gulp = require('gulp');
+var file = require('bedrock-utils/src/node/file.js');
+var utilsPath = require('bedrock-utils/src/node/path.js');
 var env = argv.env;
 var config;
 
@@ -16,9 +17,8 @@ var config;
 //-------------------------------------
 // Runtime
 
-config = suite.getPath(argv.config);
-config = require.resolve(config);
-config = fs.readFileSync(config, 'utf8');
+config = utilsPath.getPwd(argv.config);
+config = file.readFile(config);
 config = suite.init(JSON.parse(config));
 
 // Initialize

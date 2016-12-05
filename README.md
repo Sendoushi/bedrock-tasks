@@ -11,7 +11,7 @@ You need to have [node](http://nodejs.org) so you can have the package dependenc
 ```
 cd <project_folder>
 npm init # If you don't have a package.json already
-npm install --save git://github.com/Sendoushi/bedrock-tasks.git#0.0.1
+npm install --save-dev git://github.com/Sendoushi/bedrock-tasks.git#0.0.1
 ```
 
 ## Tasks
@@ -53,7 +53,7 @@ node <gulp_path> --gulpfile=<bedrock_tasks_gulpfile> <task> --env=<task_env> --c
 ```
 
 - `<gulp_path>`: Pass the path to `gulp`. From example `node_modules/.bin/gulp`. You could simply use `gulp` instead if you have it globally.
-- `<bedrock_tasks_gulpfile>`: Set the path for the `bedrock-tasks` gulpfile. It should be under `node_modules/bedrock-tasks/runner/gulpfile.js`. It is required.
+- `<bedrock_tasks_gulpfile>`: Set the path for the `bedrock-tasks` gulpfile. It should be under `node_modules/bedrock-tasks/runner/gulpfile.js` or you can use `$(npm bin)/bedrock-tasks-gulp`. It is required.
 - `<task_env>`: Environment in which the task should run. It is optional.
 
 ##### Example
