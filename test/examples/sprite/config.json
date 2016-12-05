@@ -6,14 +6,14 @@
         "env": "*",
         "data": [{
             "src": "./test/examples/sprite/img/**/*.png",
-            "dest": "./test/build/sprite/img",
+            "dest": "./test/build/sprite/img/sprite.png",
             "options": {
                 "style": "./test/build/img_sprite.scss",
                 "styleTemplate": "./src/modules/_assets/sprite_template.css.handlebars"
             }
         }, {
             "src": "./test/examples/sprite/svg/**/*.svg",
-            "dest": "./test/build/sprite/svg",
+            "dest": "./test/build/sprite/svg/sprite.svg",
             "options": {
                 "preview": false,
                 "mode": "defs",

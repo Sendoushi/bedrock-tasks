@@ -110,6 +110,7 @@ function gulpBuild(task, cb) {
     var cssTemplate = task.options.styleTemplate && utilsPath.getPwd(task.options.styleTemplate) || SPRITE_TEMPLATE;
     var dest = task.dest;
     var baseName = path.basename(dest);
+    var called = false;
     var imgStream;
     var cssStream;
     var options;
@@ -130,7 +131,10 @@ function gulpBuild(task, cb) {
         cssStream = gulpTask.css.pipe(gulp.dest(cssName));
 
         // Return a merged stream to handle both `end` events
-        return merge(imgStream, cssStream).on('end', function () { cb(); });
+        return merge(imgStream, cssStream)
+        .on('end', function () { called = true; if (!called) { return false; } cb(); })
+        .on('close', function () { called = true; if (!called) { return false; } cb(); })
+        .on('finish', function () { called = true; if (!called) { return false; } cb(); });
     }
 
     if (svg) {
@@ -170,7 +174,10 @@ function gulpBuild(task, cb) {
             dest = path.dirname(dest);
         }
 
-        return gulpTask.pipe(gulp.dest(dest)).on('end', function () { cb(); });
+        return gulpTask.pipe(gulp.dest(dest))
+        .on('end', function () { called = true; if (!called) { return false; } cb(); })
+        .on('close', function () { called = true; if (!called) { return false; } cb(); })
+        .on('finish', function () { called = true; if (!called) { return false; } cb(); });
     }
 }
 
