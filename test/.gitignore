@@ -5,3 +5,5 @@ tmp/*
 **/tmp
 **/project
 **/node_modules
+**/examples/**/styleguide.js
+**/examples/**/styleguide.scss

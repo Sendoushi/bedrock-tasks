@@ -1,11 +1,11 @@
 /* eslint-disable strict */'use strict';/* eslint-enable strict */
+/* global Promise */
 
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
 var Joi = require('joi');
 var doT = require('dot');
-var del = require('del');
 var beautify = require('js-beautify');
 var merge = require('deepmerge');
 var escape = require('escape-html');
@@ -24,10 +24,7 @@ var OPTIONS_STRUCT = Joi.object().keys({
 });
 
 var STRUCT = Joi.object().keys({
-    src: Joi.alternatives().try(
-        Joi.array(Joi.string()),
-        Joi.string()
-    ).required(),
+    src: Joi.string().required(),
     dest: Joi.string(),
     // ignore: Joi.alternatives().try(
     //     Joi.array(Joi.string()),
@@ -69,43 +66,46 @@ function readFile(pathSrc) {
  * Compiles style
  * @param  {array} srcs
  * @param  {object} options
+ * @param  {string} src
  * @param  {string} buildSrc
+ * @returns {promise}
  */
-function compileStyle(srcs, options, buildSrc) {
+function compileStyle(srcs, options, src, buildSrc) {
     var tmpl = '';
-    var tmpFile = path.join(buildSrc, '_tmp.scss');
+    var tmpFile = path.join(src, 'styleguide.scss');
     var i;
 
-    if (!srcs.length) {
-        return;
-    }
-
-    // First we need to create a global js
-    for (i = 0; i < srcs.length; i += 1) {
-        tmpl += '@import \'' + srcs[i].src + '\';\n';
-    }
-
-    // Ensure dirs exist
-    mkdirp(path.dirname(tmpFile), function (err) {
-        if (err) {
-            throw new Error(err);
+    var promise = new Promise(function (resolve, reject) {
+        if (!srcs.length) {
+            return resolve();
         }
 
-        // Write the temporary file
-        fs.writeFileSync(tmpFile, tmpl);
+        // First we need to create a global js
+        for (i = 0; i < srcs.length; i += 1) {
+            tmpl += '@import "' + srcs[i].src + '";\n';
+        }
 
-        // Now finally compile the script
-        styleModule.raw({
-            src: tmpFile,
-            dest: path.join(buildSrc, 'styleguide.css'),
-            options: options
-        }, function (compileErr) {
-            if (compileErr) {
-                throw new Error(compileErr);
+        // Ensure dirs exist
+        mkdirp(buildSrc, function (err) {
+            if (err) {
+                return reject(new Error(err));
             }
 
-            // Remove tmp file
-            del.sync([tmpFile], { force: true });
+            // Write the temporary file
+            fs.writeFileSync(tmpFile, tmpl);
+
+            // Now finally compile the script
+            styleModule.raw({
+                src: tmpFile,
+                dest: path.join(buildSrc, 'styleguide.css'),
+                options: options
+            }, function (compileErr) {
+                if (compileErr) {
+                    return reject(new Error(compileErr));
+                }
+
+                resolve();
+            });
         });
     });
 }
@@ -114,50 +114,55 @@ function compileStyle(srcs, options, buildSrc) {
  * Compiles script
  * @param  {array} srcs
  * @param  {object} options
+ * @param  {string} src
  * @param  {string} buildSrc
+ * @returns {promise}
  */
-function compileScript(srcs, options, buildSrc) {
-    var tmpFile = path.join(buildSrc, '_tmp.js');
+function compileScript(srcs, options, src, buildSrc) {
+    var tmpFile = path.join(src, 'styleguide.js');
     var tmpl = '';
     var name;
     var i;
 
-    if (!srcs.length) {
-        return;
-    }
-
-    // First we need to create a global js
-    tmpl += 'window.styleguide = {\n';
-    for (i = 0; i < srcs.length; i += 1) {
-        name = srcs[i].name.toLowerCase().replace(/ /g, '');
-        tmpl += '    ' + name + ': require(\'' + srcs[i].src + '\')';
-        tmpl += (i + 1 === srcs.length - 1) ? ',\n' : '\n';
-    }
-    tmpl += '};\n';
-
-    // Ensure dirs exist
-    mkdirp(path.dirname(tmpFile), function (err) {
-        if (err) {
-            throw new Error(err);
+    var promise = new Promise(function (resolve, reject) {
+        if (!srcs.length) {
+            return resolve();
         }
 
-        // Write the temporary file
-        fs.writeFileSync(tmpFile, tmpl);
+        // First we need to create a global js
+        tmpl += 'window.styleguide = {\n';
+        for (i = 0; i < srcs.length; i += 1) {
+            name = srcs[i].name.toLowerCase().replace(/ /g, '');
+            tmpl += '    ' + name + ': require(\'' + srcs[i].src + '\')';
+            tmpl += (i + 1 === srcs.length - 1) ? ',\n' : '\n';
+        }
+        tmpl += '};\n';
 
-        // Now finally compile the script
-        scriptModule.raw({
-            src: tmpFile,
-            dest: path.join(buildSrc, 'styleguide.js'),
-            options: options
-        }, function (compileErr) {
-            if (compileErr) {
-                throw new Error(compileErr);
+        // Ensure dirs exist
+        mkdirp(buildSrc, function (err) {
+            if (err) {
+                return reject(new Error(err));
             }
 
-            // Remove tmp file
-            del.sync([tmpFile], { force: true });
+            // Write the temporary file
+            fs.writeFileSync(tmpFile, tmpl);
+
+            // Now finally compile the script
+            scriptModule.raw({
+                src: tmpFile,
+                dest: path.join(buildSrc, 'styleguide.js'),
+                options: options
+            }, function (compileErr) {
+                if (compileErr) {
+                    return reject(new Error(compileErr));
+                }
+
+                resolve();
+            });
         });
     });
+
+    return promise;
 }
 
 /**
@@ -277,6 +282,8 @@ function getLayouts(task) {
  * @param  {function} cb
  */
 function build(task, cb) {
+    // Index is setting up an array but we can only support one for now
+    var src = !type.isArray(task.src) ? task.src : task.src[0];
     var components = getComponents(task);
     var layouts = getLayouts(task);
     var tmpl = buildComponents(components, layouts);
@@ -298,6 +305,7 @@ function build(task, cb) {
     }).map(function (comp) {
         return comp.runtime;
     });
+    var promise;
 
     // We need to pass now the template to the right layout
     tmpl = layouts[task.options.generalLayout]({
@@ -312,19 +320,36 @@ function build(task, cb) {
 
     tmpl = beautify.html(tmpl, { indent_size: 4 });
 
-    // Ensure dirs exist
-    mkdirp(path.dirname(task.dest), function (err) {
-        if (err) {
-            throw new Error(err);
-        }
+    promise = new Promise(function (resolve, reject) {
+        // Ensure dirs exist
+        mkdirp(path.dirname(task.dest), function (err) {
+            if (err) {
+                return reject(new Error(err));
+            }
 
-        // Lets compile all assets
-        compileScript(scripts, scriptCompileOptions, task.dest);
-        compileStyle(styles, styleCompileOptions, task.dest);
-
+            resolve();
+        });
+    })
+    .then(function () {
+        // Lets compile scripts
+        return compileScript(scripts, scriptCompileOptions, src, task.dest);
+    })
+    .then(function () {
+        // Lets compile style
+        return compileStyle(styles, styleCompileOptions, src, task.dest);
+    })
+    .then(function () {
         // Save template file
-        fs.writeFile(path.join(task.dest, 'styleguide.html'), tmpl, cb);
+        fs.writeFileSync(path.join(task.dest, 'styleguide.html'), tmpl);
+    })
+    .then(function () {
+        cb && cb();
+    })
+    .catch(function (err) {
+        throw err;
     });
+
+    return promise;
 }
 
 // --------------------------------
