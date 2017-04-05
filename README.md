@@ -1,3 +1,5 @@
+# NOTE: Deprecated
+
 # Bedrock: Tasks
 
 Tasks to use on the frontend.
